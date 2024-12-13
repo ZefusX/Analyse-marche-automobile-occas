@@ -33,7 +33,7 @@ def entrainer_modele_prix(data):
     print(forest.score(X_test, y_test))
     
     # Sauvegarder le modèle
-    joblib.dump(forest, 'modele_prix.pkl')
+    joblib.dump(forest, 'modele_prix.pkl', compress=("gzip", 3))
     return forest
 
 def charger_modele():
@@ -88,7 +88,7 @@ except FileNotFoundError:
 # Interface Streamlit
 st.title(":green[Prédiction du prix d'une voiture] 🚗")
 st.divider()
-
+st.text("Beta ⚠️")
 df = pd.read_parquet("data_unique.parquet")
 
 brands = df["brand"].dropna().unique()
