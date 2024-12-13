@@ -48,7 +48,6 @@ fig = go.Figure(data=go.Heatmap(
     hoverinfo="text"   
 ))
 
-# Mise en forme du graphique
 fig.update_traces(
     texttemplate="%{text}",  
     textfont=dict(size=12),  
@@ -61,7 +60,6 @@ fig.update_layout(
     autosize=True,
 )
 
-# Affichage dans Streamlit
 st.title("Matrice de corrélation")
 st.plotly_chart(fig, use_container_width=True)
 

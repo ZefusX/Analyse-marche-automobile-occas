@@ -9,39 +9,30 @@ from sklearn.model_selection import train_test_split
 
 warnings.filterwarnings('ignore')
 
-# Charger les données depuis un fichier Parquet
 def charger_donnees_parquet(fichier_parquet):
     return pd.read_parquet(fichier_parquet)
 
 def entrainer_modele_prix(data):
-    # Supprimer les lignes contenant des valeurs manquantes
     data = data.dropna()
 
-    # Séparer les features (X) et la cible (y)
     X = data.drop(columns=['price_cents'])
     y = data['price_cents']
     
-    # Appliquer get_dummies pour gérer les variables catégorielles avant la séparation des données
     X = pd.get_dummies(X, columns=['brand',"model"], drop_first=True)
     
-    # Diviser les données en ensembles d'entraînement et de test
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
     
-    # Entraîner le modèle RandomForestRegressor
     forest = RandomForestRegressor()
     forest.fit(X_train, y_train)
     print(forest.score(X_test, y_test))
     
-    # Sauvegarder le modèle
     joblib.dump(forest, 'modele_prix.pkl', compress=("gzip", 3))
     return forest
 
 def charger_modele():
-    # Charger le modèle préalablement entraîné
     return joblib.load('modele_prix.pkl')
 
 def estimer_prix(modele, model, brand, year, horsepower, mileage, nb_doors, nb_seats, gearbox, f_horsepower, fuel_type):
-    # Créer un DataFrame pour une seule observation
     data = pd.DataFrame([{
         'brand': brand,
         'model': model,
@@ -55,20 +46,15 @@ def estimer_prix(modele, model, brand, year, horsepower, mileage, nb_doors, nb_s
         'fuel_type': fuel_type
     }])
     
-    # Appliquer get_dummies sur les nouvelles données, comme pour l'entraînement
     data = pd.get_dummies(data, columns=['brand', 'model'], drop_first=True)
     
-    # Ajouter les colonnes manquantes si nécessaire (par exemple, "brand_Renault" s'il manque)
     missing_cols = set(modele.feature_names_in_) - set(data.columns)
     
-    # Créer un dictionnaire avec les colonnes manquantes initialisées à 0
     for col in missing_cols:
         data[col] = 0
     
-    # Réordonner les colonnes pour correspondre à l'ordre des colonnes d'entraînement
     data = data[modele.feature_names_in_]
     
-    # Prédire le prix
     price_cents = modele.predict(data)[0]
     return price_cents
 
